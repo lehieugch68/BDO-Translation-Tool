@@ -15,8 +15,8 @@ namespace BDOTranslationTool
     public partial class BDOTranslationTool : Form
     {
         string _AppPath = AppDomain.CurrentDomain.BaseDirectory;
-        string _GamePath;
-        bool _Installing = false, _Uninstalling = false, _Decompress = false;
+        string _GamePath = "";
+        bool _Installing = false, _Uninstalling = false, _Decompressing = false;
         public BDOTranslationTool()
         {
             InitializeComponent();
@@ -79,7 +79,7 @@ namespace BDOTranslationTool
 
         private void Install_Click(object sender, EventArgs e)
         {
-            if (!_Installing && !_Uninstalling && !_Decompress)
+            if (!_Installing && !_Uninstalling && !_Decompressing)
             {
                 string sourceFile = $"{_GamePath}\\ads\\languagedata_en.loc";
                 string encryptFile = $"{_AppPath}\\languagedata_en.loc";
@@ -123,7 +123,7 @@ namespace BDOTranslationTool
 
         private void buttonDecompress_Click(object sender, EventArgs e)
         {
-            if (!_Installing && !_Uninstalling && !_Decompress)
+            if (!_Installing && !_Uninstalling && !_Decompressing)
             {
                 string sourceFile = $"{_GamePath}\\ads\\languagedata_en.loc";
                 string decryptFile = $"{_AppPath}\\languagedata_en.tsv";
@@ -135,11 +135,11 @@ namespace BDOTranslationTool
                     {
                         if (File.Exists(sourceFile))
                         {
-                            _Decompress = true;
+                            _Decompressing = true;
                             ReportProgress(0);
                             Task.Run(() => { decrypt(decompress(sourceFile), decryptFile); }).GetAwaiter().OnCompleted(() =>
                             {
-                                if (!_Decompress) return;
+                                if (!_Decompressing) return;
                                 ReportProgress(33);
                                 Task.Run(() => {
                                     File.WriteAllBytes(translationFile, File.ReadAllBytes(decryptFile));
@@ -148,7 +148,7 @@ namespace BDOTranslationTool
                                     ReportProgress(67);
                                     Task.Run(() => { Remove_Duplicate(translationFile); }).GetAwaiter().OnCompleted(() =>
                                     {
-                                        _Decompress = false;
+                                        _Decompressing = false;
                                         ReportStatus("Giải nén thành công!");
                                         ReportProgress(100);
                                     });
@@ -183,7 +183,7 @@ namespace BDOTranslationTool
             catch (Exception e)
             {
                 if (_Installing) _Installing = false;
-                if (_Decompress) _Decompress = false;
+                if (_Decompressing) _Decompressing = false;
                 if (_Uninstalling) _Uninstalling = false;
                 MessageBox.Show("Đã xảy ra lỗi!\n\n" + e, "Thông báo");
                 ReportStatus("Chưa rõ");
@@ -192,7 +192,7 @@ namespace BDOTranslationTool
 
         private void Replace_Text(string sourceFile, string translationFile)
         {
-            if (!_Installing && !_Decompress) return;
+            if (!_Installing && !_Decompressing) return;
             try
             {
                 ReportStatus($"Đang sao chép bản dịch");
@@ -246,14 +246,14 @@ namespace BDOTranslationTool
             {
                 MessageBox.Show("Đã xảy ra lỗi!\n\n" + e, "Thông báo");
                 if (_Installing) _Installing = false;
-                if (_Decompress) _Decompress = false;
+                if (_Decompressing) _Decompressing = false;
                 ReportStatus("Chưa rõ");
             }
         }
 
         private void Remove_Duplicate(string file)
         {
-            if (!_Installing && !_Decompress) return;
+            if (!_Installing && !_Decompressing) return;
             try
             {
                 int total = File.ReadAllLines(file).Count();
@@ -290,7 +290,7 @@ namespace BDOTranslationTool
             {
                 MessageBox.Show("Đã xảy ra lỗi!\n\n" + e, "Thông báo");
                 if (_Installing) _Installing = false;
-                if (_Decompress) _Decompress = false;
+                if (_Decompressing) _Decompressing = false;
                 ReportStatus("Chưa rõ");
             }
         }
@@ -313,7 +313,7 @@ namespace BDOTranslationTool
             {
                 ReportStatus("Đã xảy ra lỗi");
                 if (_Installing) _Installing = false;
-                if (_Decompress) _Decompress = false;
+                if (_Decompressing) _Decompressing = false;
             }
             return stream;
         }
@@ -355,7 +355,7 @@ namespace BDOTranslationTool
 
         private void decrypt(MemoryStream stream, string decryptFile)
         {
-            if (!_Installing && !_Decompress) return;
+            if (!_Installing && !_Decompressing) return;
             try
             {
                 stream.Position = 0;
@@ -387,7 +387,7 @@ namespace BDOTranslationTool
             {
                 MessageBox.Show("Đã xảy ra lỗi!\n\n" + e, "Thông báo");
                 if (_Installing) _Installing = false;
-                if (_Decompress) _Decompress = false;
+                if (_Decompressing) _Decompressing = false;
                 ReportStatus("Chưa rõ");
             }
         }
@@ -429,7 +429,7 @@ namespace BDOTranslationTool
             {
                 ReportStatus("Đã xảy ra lỗi");
                 if (_Installing) _Installing = false;
-                if (_Decompress) _Decompress = false;
+                if (_Decompressing) _Decompressing = false;
             }
             return stream;
         }
