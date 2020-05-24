@@ -18,4 +18,4 @@ Công cụ hỗ trợ dịch trò chơi Black Desert Online.
 * Chỉ nên giải nén một lần vì thời gian lọc câu trùng khá lâu, trừ khi bạn đã dịch hết toàn bộ game và muốn dịch tiếp các nội dung mới cập nhật.
 * Luôn giữ format gốc của file để tránh bị lỗi: định dạng **TSV**, mã hóa **UCS-2 LE BOM** (UTF-16).
 * Chỉ sửa file **BDO_Translation.tsv**, không chỉnh sửa các file khác.
-* Muốn xuống dòng trong câu dùng ký tự **<lf>**.
+* Muốn xuống dòng trong câu dùng ký tự \<lf>.
