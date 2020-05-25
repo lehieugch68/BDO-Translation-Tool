@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +15,7 @@ namespace BDOTranslationTool
     public partial class BDOTranslationTool : Form
     {
         string _AppPath = AppDomain.CurrentDomain.BaseDirectory;
-        string _GamePath = "";
+        string _GamePath;
         bool _Installing = false, _Uninstalling = false, _Decompressing = false;
         public BDOTranslationTool()
         {
@@ -136,24 +136,6 @@ namespace BDOTranslationTool
                         if (File.Exists(sourceFile))
                         {
                             _Decompressing = true;
-                            ReportProgress(0);
-                            Task.Run(() => { decrypt(decompress(sourceFile), decryptFile); }).GetAwaiter().OnCompleted(() =>
-                            {
-                                if (!_Decompressing) return;
-                                ReportProgress(33);
-                                Task.Run(() => {
-                                    File.WriteAllBytes(translationFile, File.ReadAllBytes(decryptFile));
-                                }).GetAwaiter().OnCompleted(() =>
-                                {
-                                    ReportProgress(67);
-                                    Task.Run(() => { Remove_Duplicate(translationFile); }).GetAwaiter().OnCompleted(() =>
-                                    {
-                                        _Decompressing = false;
-                                        ReportStatus("Giải nén thành công!");
-                                        ReportProgress(100);
-                                    });
-                                });
-                            });
                         }
                         else
                         {
@@ -165,11 +147,34 @@ namespace BDOTranslationTool
                         return;
                     }
                 }
+
+                if (_Decompressing)
+                {
+                    ReportProgress(0);
+                    Task.Run(() => { decrypt(decompress(sourceFile), decryptFile); }).GetAwaiter().OnCompleted(() =>
+                    {
+                        if (!_Decompressing) return;
+                        ReportProgress(33);
+                        Task.Run(() => {
+                            File.WriteAllBytes(translationFile, File.ReadAllBytes(decryptFile));
+                        }).GetAwaiter().OnCompleted(() =>
+                        {
+                            ReportProgress(67);
+                            Task.Run(() => { Remove_Duplicate(translationFile); }).GetAwaiter().OnCompleted(() =>
+                            {
+                                _Decompressing = false;
+                                ReportStatus("Giải nén thành công!");
+                                ReportProgress(100);
+                            });
+                        });
+                    });
+                }
             }
         }
 
         private void CopyFile (string sourceFile, string destinationFile)
         {
+            ReportProgress(0);
             try
             {
                 if (File.Exists(sourceFile))
@@ -439,6 +444,4 @@ namespace BDOTranslationTool
             Process.Start("https://viethoagame.com/threads/pc-black-desert-online-viet-hoa.222/");
         }
     }
-
-
 }
