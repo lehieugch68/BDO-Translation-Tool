@@ -361,7 +361,6 @@ namespace BDOTranslationTool
                 using (var reader = new BinaryReader(stream))
                 {
                     double total = reader.BaseStream.Length;
-                    double position = 0;
                     ReportStatus($"Đang giải mã ({total} byte)");
                     using (var output = new StreamWriter(decryptFile, false, Encoding.Unicode))
                     {
@@ -377,7 +376,6 @@ namespace BDOTranslationTool
                             string str = Encoding.Unicode.GetString(reader.ReadBytes(Convert.ToInt32(strSize * 2))).Replace("\n", "<lf>");
                             reader.ReadBytes(4);
                             output.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}", strType, strID1, strID2, strID3, strID4, str);
-                            position = reader.BaseStream.Position;
                         }
                     }
                 }
