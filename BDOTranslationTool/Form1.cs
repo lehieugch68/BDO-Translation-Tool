@@ -133,13 +133,10 @@ namespace BDOTranslationTool
                     DialogResult dialogResult = MessageBox.Show("Phát hiện tệp BDO_Translation.tsv\nBạn có chắc muốn ghi đè tệp này?", "Thông báo", MessageBoxButtons.YesNo);
                     if (dialogResult == DialogResult.Yes)
                     {
-                        if (File.Exists(sourceFile))
-                        {
-                            _Decompressing = true;
-                        }
-                        else
-                        {
+                        if (!File.Exists(sourceFile))
+                        { 
                             MessageBox.Show("Không tìm thấy tệp languagedata_en.loc!", "Thông báo");
+                            return;
                         }
                     }
                     else if (dialogResult == DialogResult.No)
@@ -147,28 +144,25 @@ namespace BDOTranslationTool
                         return;
                     }
                 }
-
-                if (_Decompressing)
+                _Decompressing = true;
+                ReportProgress(0);
+                Task.Run(() => { decrypt(decompress(sourceFile), decryptFile); }).GetAwaiter().OnCompleted(() =>
                 {
-                    ReportProgress(0);
-                    Task.Run(() => { decrypt(decompress(sourceFile), decryptFile); }).GetAwaiter().OnCompleted(() =>
+                    if (!_Decompressing) return;
+                    ReportProgress(33);
+                    Task.Run(() => {
+                        File.WriteAllBytes(translationFile, File.ReadAllBytes(decryptFile));
+                    }).GetAwaiter().OnCompleted(() =>
                     {
-                        if (!_Decompressing) return;
-                        ReportProgress(33);
-                        Task.Run(() => {
-                            File.WriteAllBytes(translationFile, File.ReadAllBytes(decryptFile));
-                        }).GetAwaiter().OnCompleted(() =>
+                        ReportProgress(67);
+                        Task.Run(() => { Remove_Duplicate(translationFile); }).GetAwaiter().OnCompleted(() =>
                         {
-                            ReportProgress(67);
-                            Task.Run(() => { Remove_Duplicate(translationFile); }).GetAwaiter().OnCompleted(() =>
-                            {
-                                _Decompressing = false;
-                                ReportStatus("Giải nén thành công!");
-                                ReportProgress(100);
-                            });
+                            _Decompressing = false;
+                            ReportStatus("Giải nén thành công!");
+                            ReportProgress(100);
                         });
                     });
-                }
+                });
             }
         }
 
