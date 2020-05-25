@@ -170,7 +170,6 @@ namespace BDOTranslationTool
 
         private void CopyFile (string sourceFile, string destinationFile)
         {
-            ReportProgress(0);
             try
             {
                 if (File.Exists(sourceFile))
