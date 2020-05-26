@@ -9,6 +9,7 @@ using System.IO.Compression;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using Microsoft.Win32;
 using System.Diagnostics;
+using System.Net;
 
 namespace BDOTranslationTool
 {
@@ -16,7 +17,8 @@ namespace BDOTranslationTool
     {
         string _AppPath = AppDomain.CurrentDomain.BaseDirectory;
         string _GamePath;
-        bool _Installing = false, _Uninstalling = false, _Decompressing = false;
+        bool _Installing = false, _Uninstalling = false, _Decompressing = false, _Downloading = false, _Merging = false;
+        Dictionary<string, string> translator = new Dictionary<string, string>();
         public BDOTranslationTool()
         {
             InitializeComponent();
@@ -62,6 +64,13 @@ namespace BDOTranslationTool
             {
                 MessageBox.Show("Không tìm thấy thư mục cài đặt Black Desert Online!\nVui lòng chọn đường dẫn thủ công.", "Thông báo");
             }
+            translator.Add("Sú", "");
+            translator.Add("Lê Hiếu", "");
+            foreach (string key in translator.Keys)
+            {
+                selectTranslator.Items.Add(key);
+            }
+            selectTranslator.SelectedIndex = 0;
         }
 
         private void Browser_Click(object sender, EventArgs e)
@@ -134,7 +143,7 @@ namespace BDOTranslationTool
                     if (dialogResult == DialogResult.Yes)
                     {
                         if (!File.Exists(sourceFile))
-                        { 
+                        {
                             MessageBox.Show("Không tìm thấy tệp languagedata_en.loc!", "Thông báo");
                             return;
                         }
@@ -166,7 +175,7 @@ namespace BDOTranslationTool
             }
         }
 
-        private void CopyFile (string sourceFile, string destinationFile)
+        private void CopyFile(string sourceFile, string destinationFile)
         {
             ReportProgress(0);
             try
@@ -200,7 +209,7 @@ namespace BDOTranslationTool
                     while (!reader.EndOfStream)
                     {
                         string[] content = reader.ReadLine().Split(new string[] { "\t" }, StringSplitOptions.None);
-                        if (!string.IsNullOrWhiteSpace(content[0]) && !string.IsNullOrWhiteSpace(content[1]))
+                        if (content.Length > 1 && content[0] != "<null>" && !content[0].StartsWith("https://") && !string.IsNullOrWhiteSpace(content[0]) && !string.IsNullOrWhiteSpace(content[1]))
                         {
                             try
                             {
@@ -239,7 +248,7 @@ namespace BDOTranslationTool
                     }
                 }
                 dictionary.Clear();
-            } 
+            }
             catch (Exception e)
             {
                 MessageBox.Show("Đã xảy ra lỗi!\n\n" + e, "Thông báo");
@@ -268,7 +277,7 @@ namespace BDOTranslationTool
                                 count++;
                                 ReportStatus($"Đang kiểm tra những câu bị trùng ({count}/{total} dòng)");
                                 string[] content = reader.ReadLine().Split(new string[] { "\t" }, StringSplitOptions.None);
-                                if (!string.IsNullOrWhiteSpace(content[5]) && !lines.Contains(content[5]) && content[5] != "<null>")
+                                if (content.Length > 1 && !string.IsNullOrWhiteSpace(content[5]) && content[5] != "<null>" && !content[5].StartsWith("http://") && !lines.Contains(content[5]))
                                 {
                                     temp.WriteLine($"{content[5]}\t");
                                     lines.Add(content[5]);
@@ -284,7 +293,7 @@ namespace BDOTranslationTool
                 }
                 lines.Clear();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show("Đã xảy ra lỗi!\n\n" + e, "Thông báo");
                 if (_Installing) _Installing = false;
@@ -305,7 +314,7 @@ namespace BDOTranslationTool
                     {
                         deflateStream.CopyTo(stream);
                     }
-                } 
+                }
             }
             catch
             {
@@ -343,7 +352,8 @@ namespace BDOTranslationTool
                 writeBinary.Write(size);
                 writeBinary.Write(bos.ToArray());
                 writeBinary.Close();
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 MessageBox.Show("Đã xảy ra lỗi!\n\n" + e, "Thông báo");
                 if (_Installing) _Installing = false;
@@ -363,7 +373,7 @@ namespace BDOTranslationTool
                     ReportStatus($"Đang giải mã ({total} byte)");
                     using (var output = new StreamWriter(decryptFile, false, Encoding.Unicode))
                     {
-                        
+
                         while (reader.BaseStream.Position != reader.BaseStream.Length)
                         {
                             UInt32 strSize = reader.ReadUInt32();
@@ -378,7 +388,7 @@ namespace BDOTranslationTool
                         }
                     }
                 }
-            } 
+            }
             catch (Exception e)
             {
                 MessageBox.Show("Đã xảy ra lỗi!\n\n" + e, "Thông báo");
@@ -420,7 +430,7 @@ namespace BDOTranslationTool
                     }
                     reader.Close();
                 }
-            } 
+            }
             catch
             {
                 ReportStatus("Đã xảy ra lỗi");
