@@ -64,13 +64,13 @@ namespace BDOTranslationTool
             {
                 MessageBox.Show("Không tìm thấy thư mục cài đặt Black Desert Online!\nVui lòng chọn đường dẫn thủ công.", "Thông báo");
             }
-            translator.Add("Sú", "");
+            /*translator.Add("Sú", "");
             translator.Add("Lê Hiếu", "");
             foreach (string key in translator.Keys)
             {
                 selectTranslator.Items.Add(key);
             }
-            selectTranslator.SelectedIndex = 0;
+            selectTranslator.SelectedIndex = 0;*/
         }
 
         private void Browser_Click(object sender, EventArgs e)
