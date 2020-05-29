@@ -4,7 +4,8 @@ Công cụ hỗ trợ dịch trò chơi Black Desert Online.
 ### Chức năng: 
 
 * Giải nén/giải mã, chuyển đổi định dạng tệp languagedata_en.loc về dạng TSV để chỉnh sửa ngôn ngữ trong game Black Desert Online.
-* Hỗ trợ cập nhật bản dịch vào tệp mới khi game update.
+* Hỗ trợ cập nhật bản dịch vào file mới khi game update.
+* Tải bản dịch của người khác và gộp bản dịch.
 
 ### Cách dùng:
 
