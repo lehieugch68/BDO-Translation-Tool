@@ -590,6 +590,7 @@ namespace BDOTranslationTool
                 Write_Log($"Bắt đầu mã hóa {allLines.Length} dòng...");
                 BinaryWriter writeBinary = new BinaryWriter(stream);
                 byte[] zeroes = { (byte)0, (byte)0, (byte)0, (byte)0 };
+                string[] excel_cal_char = { "'+", "'=", "'-" };
                 foreach (string line in allLines)
                 {
                     string[] content = line.Split(new string[] { "\t" }, StringSplitOptions.None);
@@ -599,7 +600,6 @@ namespace BDOTranslationTool
                     byte strID3 = Convert.ToByte(content[3]);
                     byte strID4 = Convert.ToByte(content[4]);
                     string str = content[5].Replace("<lf>", "\n").Replace("<quot>", $"{(char)34}");
-                    string[] excel_cal_char = { "'+", "'=", "'-" };
                     if (excel_cal_char.Any(character => str.StartsWith(character)))
                     {
                         str = str.TrimStart((char)39);
