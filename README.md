@@ -23,6 +23,7 @@ Công cụ hỗ trợ dịch trò chơi Black Desert Online.
 * Muốn xuống dòng trong câu dùng ký tự \<lf>.
 * Tất cả ký tự nháy kép (") thay thế bằng **\<quot>** để tránh lỗi với Excel.
 * Các câu dịch có ký tự **+, =, -** ở đầu thì thêm dấu nháy đơn (') vào trước để tránh Excel hiểu nhầm là phép tính gây ra lỗi.
+* Tải và gộp bản dịch của người khác vào tệp **BDO_Translation.tsv**.
 
 ### Sửa Font:
 * Tạo thư mục **prestringtable** trong thư mục game và copy font bạn muốn đổi trong game (dạng TTF), đổi tên file font thành **pearl.ttf**.
