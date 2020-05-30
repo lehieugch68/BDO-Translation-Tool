@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,9 +104,10 @@ namespace BDOTranslationTool
                     {
                         download.DownloadProgressChanged += download_ProgressChanged;
                         download.DownloadFileCompleted += download_Completed;
-                        download.QueryString.Add("path", $"{path}\\{value[1]}");
+                        string zipFile = Path.Combine(path, value[1]);
+                        download.QueryString.Add("path", zipFile);
                         Write_Log($"Đang tải xuống bản dịch của {value[2]}...");
-                        download.DownloadFileAsync(new Uri(value[0]), $"{path}\\{value[1]}");
+                        download.DownloadFileAsync(new Uri(value[0]), zipFile);
                     }
                 }
                 catch (Exception err)
@@ -130,33 +131,43 @@ namespace BDOTranslationTool
 
         private void download_Completed(object sender, AsyncCompletedEventArgs e)
         {
-            Write_Log($"Đang giải nén bản dịch...");
             string path = ((WebClient)(sender)).QueryString["path"];
-            string extractPath = Path.Combine(_AppPath, "translator");
-            try
+            FileInfo zipFile = new FileInfo(path);
+            if (zipFile.Length > 0)
             {
-                Task.Run(() =>
+                Write_Log($"Đang giải nén bản dịch...");
+                string extractPath = Path.Combine(_AppPath, "translator");
+                try
                 {
-                    using (var zip = ZipFile.OpenRead(path))
+                    Task.Run(() =>
                     {
-                        foreach (var entry in zip.Entries)
+                        using (var zip = ZipFile.OpenRead(path))
                         {
-                            string destinationPath = Path.Combine(extractPath, entry.FullName);
-                            entry.ExtractToFile(destinationPath, true);
+                            foreach (var entry in zip.Entries)
+                            {
+                                string destinationPath = Path.Combine(extractPath, entry.FullName);
+                                entry.ExtractToFile(destinationPath, true);
+                            }
                         }
-                    }
-                }).GetAwaiter().OnCompleted(() =>
+                    }).GetAwaiter().OnCompleted(() =>
+                    {
+                        _Downloading = false;
+                        File.Delete(path);
+                        Write_Log("Giải nén bản dịch thành công.");
+                    });
+                }
+                catch (Exception err)
                 {
+                    Write_Log("Xảy ra lỗi khi giải nén bản dịch!");
                     _Downloading = false;
-                    File.Delete(path);
-                    Write_Log("Giải nén bản dịch thành công.");
-                });
+                    MessageBox.Show("Đã xảy ra lỗi!\n\n" + err, "Thông báo");
+                }
             }
-            catch (Exception err)
+            else
             {
-                Write_Log("Xảy ra lỗi khi giải nén bản dịch!");
                 _Downloading = false;
-                MessageBox.Show("Đã xảy ra lỗi!\n\n" + err, "Thông báo");
+                File.Delete(path);
+                Write_Log($"Tải thất bại!");
             }
         }
 
