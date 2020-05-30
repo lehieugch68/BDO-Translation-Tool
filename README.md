@@ -26,5 +26,5 @@ Công cụ hỗ trợ dịch trò chơi Black Desert Online.
 * Các câu dịch có ký tự **+, =, -** ở đầu thì thêm dấu nháy đơn (') vào trước để tránh Excel hiểu nhầm là phép tính gây ra lỗi.
 
 ### Sửa Font:
-* Tạo thư mục **prestringtable** trong thư mục game và copy font bạn muốn đổi trong game (dạng TTF), đổi tên file font thành **pearl.ttf**.
+* Tạo thư mục **prestringtable/font** trong thư mục game và copy font bạn muốn đổi trong game (dạng TTF), đổi tên file font thành **pearl.ttf**.
 * Font mình đang sử dụng: [Source Han Sans Bold](https://drive.google.com/file/d/1PAohgWBm0YcD9SEsYTTmJqM4jDvp3nzn/view?usp=sharing). Tải về giải nén vào thư mục game.
