@@ -11,6 +11,8 @@ using ICSharpCode.SharpZipLib.Zip.Compression;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.Net;
+using System.Web.UI;
+using System.Web.Script.Serialization;
 
 namespace BDOTranslationTool
 {
@@ -20,6 +22,7 @@ namespace BDOTranslationTool
         string _GamePath;
         bool _Installing = false, _Uninstalling = false, _Decompressing = false, _Downloading = false, _Merging = false;
         Dictionary<string, string[]> translator = new Dictionary<string, string[]>();
+        string jsonUrl = "https://lehieugch68.github.io/BDO/translator.json";
         public BDOTranslationTool()
         {
             InitializeComponent();
@@ -64,8 +67,17 @@ namespace BDOTranslationTool
             {
                 MessageBox.Show("Không tìm thấy thư mục cài đặt Black Desert Online!\nVui lòng chọn đường dẫn thủ công.", "Thông báo");
             }
-            translator.Add("Sú", new string[] { "https://drive.google.com/uc?export=download&id=1Jy8OiFDu2EXZsz2u0aIOpdxXNs2jrtb_", "BDO_Translation_Su.zip", "Sú", "https://www.facebook.com/visaosang2305" });
-            translator.Add("Lê Hiếu", new string[] { "https://drive.google.com/uc?export=download&id=1Oo9el5Z0CHx46EUZ4YPmgl02gcatRuw3", "BDO_Translation_LeHieu.zip", "Lê Hiếu", "https://www.facebook.com/le.anh.hieu.68" });
+            string jsonFile = $"{_AppPath}\\translator\\translator.json";
+            if (File.Exists(jsonFile))
+            {
+                translator = new JavaScriptSerializer().Deserialize<Dictionary<string, string[]>>(File.ReadAllText(jsonFile));
+                
+            }
+            else
+            {
+                translator.Add("Sú", new string[] { "", "BDO_Translation_Su.zip", "Sú", "https://www.facebook.com/visaosang2305" });
+                translator.Add("Lê Hiếu", new string[] { "", "BDO_Translation_LeHieu.zip", "Lê Hiếu", "https://www.facebook.com/le.anh.hieu.68" });
+            }
             foreach (string key in translator.Keys)
             {
                 selectTranslator.Items.Add(key);
@@ -88,9 +100,8 @@ namespace BDOTranslationTool
 
         private void buttonDownload_Click(object sender, EventArgs e)
         {
-            string[] value;
             string path = Path.Combine(_AppPath, "translator");
-            if (!_Downloading && !_Merging && translator.TryGetValue(selectTranslator.GetItemText(selectTranslator.SelectedItem), out value))
+            if (!_Downloading && !_Merging)
             {
                 _Downloading = true;
                 try
@@ -100,14 +111,24 @@ namespace BDOTranslationTool
                         Directory.CreateDirectory(path);
                         Write_Log($"Tạo thư mục: {path}");
                     }
-                    using (WebClient download = new WebClient())
+                    Write_Log($"Đang tải tệp JSON...");
+                    using (WebClient JsonDownload = new WebClient())
                     {
-                        download.DownloadProgressChanged += download_ProgressChanged;
-                        download.DownloadFileCompleted += download_Completed;
-                        string zipFile = Path.Combine(path, value[1]);
-                        download.QueryString.Add("path", zipFile);
-                        Write_Log($"Đang tải xuống bản dịch của {value[2]}...");
-                        download.DownloadFileAsync(new Uri(value[0]), zipFile);
+                        JsonDownload.DownloadFile(jsonUrl, Path.Combine(path, "translator.json"));
+                    }
+                    translator = new JavaScriptSerializer().Deserialize<Dictionary<string, string[]>>(File.ReadAllText(Path.Combine(path, "translator.json")));
+                    string[] value;
+                    if (translator.TryGetValue(selectTranslator.GetItemText(selectTranslator.SelectedItem), out value))
+                    {
+                        using (WebClient download = new WebClient())
+                        {
+                            download.DownloadProgressChanged += download_ProgressChanged;
+                            download.DownloadFileCompleted += download_Completed;
+                            string zipFile = Path.Combine(path, value[1]);
+                            download.QueryString.Add("path", zipFile);
+                            Write_Log($"Đang tải xuống bản dịch của {value[2]}...");
+                            download.DownloadFileAsync(new Uri(value[0]), zipFile);
+                        }
                     }
                 }
                 catch (Exception err)
@@ -399,11 +420,14 @@ namespace BDOTranslationTool
                 foreach (string line in allLines)
                 {
                     string[] content = line.Split(new string[] { "\t" }, StringSplitOptions.None);
-                    content[0] = content[0].TrimStart((char)34).TrimEnd((char)34);
-                    content[1] = content[1].TrimStart((char)34).TrimEnd((char)34).Replace($"{(char)34}", "<quot>");
-                    if (content.Length > 1 && content[0] != "<null>" && !content[0].StartsWith("http") && !string.IsNullOrWhiteSpace(content[0]) && !string.IsNullOrWhiteSpace(content[1]))
+                    if (content.Length > 1)
                     {
-                        if (!dictionary.ContainsKey(content[0])) dictionary.Add(content[0], content[1]);
+                        content[0] = content[0].TrimStart((char)34).TrimEnd((char)34);
+                        content[1] = content[1].TrimStart((char)34).TrimEnd((char)34).Replace($"{(char)34}", "<quot>");
+                        if (content[0] != "<null>" && !content[0].StartsWith("http") && !string.IsNullOrWhiteSpace(content[0]) && !string.IsNullOrWhiteSpace(content[1]) && !dictionary.ContainsKey(content[0]))
+                        {
+                            dictionary.Add(content[0], content[1]);
+                        }
                     }
                 }
                 Write_Log($"Thêm thành công {dictionary.Count()} dòng.");
